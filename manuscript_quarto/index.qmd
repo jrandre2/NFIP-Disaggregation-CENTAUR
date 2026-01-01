@@ -310,7 +310,7 @@ We present a probabilistic disaggregation workflow that maps aggregated NFIP cla
 
 # Data and Code Availability {#sec-availability}
 
-Code, derived outputs, and documentation are available at https://github.com/jrandre2/NFIP-Disaggregation-CENTAUR. All input datasets are publicly available from OpenFEMA, FEMA NFHL, USGS 3DEP, and the U.S. Census Bureau; Nebraska parcel data are sourced from statewide assessor records.
+Code, derived outputs, and documentation are available at https://github.com/jrandre2/NFIP-Disaggregation-CENTAUR. All input datasets are publicly available from OpenFEMA, FEMA NFHL, USGS 3DEP, and the U.S. Census Bureau; Nebraska parcel data are sourced from statewide assessor records. The FEMA Housing Assistance Owners dataset used for external validation is available at https://www.fema.gov/openfema-data-page/housing-assistance-owners.
 
 # References {.unnumbered}
 
