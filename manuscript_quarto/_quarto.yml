@@ -1,0 +1,67 @@
+project:
+  type: default
+  output-dir: _output
+  render:
+    - index.qmd
+
+# Journal-specific profiles
+# Usage: quarto render --profile jeem
+# Profile configs are in _quarto-{profile}.yml files
+profile:
+  default: risa
+  group:
+    - [default, risa, jeem, aer, nhaz]
+
+format:
+  html:
+    toc: false
+    toc-depth: 3
+    number-sections: true
+    code-fold: true
+    theme: cosmo
+
+  pdf:
+    documentclass: article
+    papersize: letter
+    geometry:
+      - margin=1in
+    number-sections: true
+    toc: false
+    keep-tex: true
+    top-level-division: section
+    include-in-header:
+      text: |
+        \usepackage{booktabs}
+        \usepackage{longtable}
+        \usepackage{float}
+        \usepackage{needspace}
+        \renewenvironment{abstract}{\par\bigskip\noindent\textbf{Abstract}\par\smallskip}{\par\bigskip}
+
+  docx:
+    toc: false
+    toc-depth: 2
+    number-sections: true
+    reference-doc: reference.docx
+    highlight-style: github
+
+bibliography: references.bib
+csl: csl/apa.csl  # Default citation style; override per-journal in profile files
+
+execute:
+  freeze: auto
+  cache: false
+  warning: false
+  message: false
+  echo: false
+
+crossref:
+  fig-prefix: "Figure"
+  tbl-prefix: "Table"
+  eq-prefix: "Equation"
+  sec-prefix: "Section"
+
+knitr:
+  opts_chunk:
+    echo: false
+    fig.align: center
+    out.width: "100%"

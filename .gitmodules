@@ -1,0 +1,3 @@
+[submodule "scripts/NEFloodMitigation"]
+	path = scripts/NEFloodMitigation
+	url = https://github.com/jrandre2/NEFloodMitigation-Risk-Assessment-and-Community-Adaptation.git
