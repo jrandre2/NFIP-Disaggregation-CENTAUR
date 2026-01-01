@@ -1,0 +1,332 @@
+---
+title: "An Approach to Probabilistic Disaggregation of National Flood Insurance Program (NFIP) Claims onto Building Footprints"
+author:
+  - name: "Zhenghong Tang"
+    affiliations:
+      - name: "University of Nebraska-Lincoln"
+        department: "Community and Regional Planning"
+    corresponding: true
+  - name: "Jesse Andrews"
+    affiliations:
+      - name: "Texas Tech University"
+  - name: "Yunwoo Nam"
+    affiliations:
+      - name: "University of Nebraska-Lincoln"
+  - name: "Jiyoung Lee"
+    affiliations:
+      - name: "University of Nebraska-Lincoln"
+abstract: |
+  Aggregated National Flood Insurance Program (NFIP) claims data restrict granular flood risk analysis and the identification of localized damage patterns. This study presents a probabilistic spatial disaggregation workflow that assigns anonymized NFIP claims to building footprints while quantifying uncertainty. The approach combines hierarchical filtering with bootstrap resampling to generate building-level claim likelihood indices and uncertainty diagnostics. We apply the method to the March 2019 flood in eastern Nebraska using OpenFEMA residential claims (occupancyType=1): 261 claims in Dodge County and 204 claims in Douglas County, combined with Microsoft building footprints, county parcel data, and FEMA NFHL flood zones. We also replicate the workflow for the 2011 late-spring storms event in Cass and Dakota Counties using the same public inputs where available. The baseline configuration uses ZIP/ZCTA and flood-zone matching and retains the largest structure per parcel. Sensitivity tests examine ZIP versus ZCTA versus census block groups, coarse OpenFEMA latitude/longitude, construction-year tolerances, and additional covariates (slope and distance-to-SFHA filters for Zone X claims). Validation uses a remotely sensed inundation footprint and an independent ZIP-level comparison against FEMA Housing Assistance Owners totals. The baseline achieves high discrimination in 2019 (ROC-AUC 0.960 in Dodge; 0.939 in Douglas), and slope filtering modestly improves performance; loss-size stratification shows weaker and more variable performance in the highest-payment stratum. Policy-based bootstraps and ACS-derived uptake rates provide context for insurance coverage. This workflow produces building-level likelihood surfaces from public NFIP data, supporting post-event analysis and local risk communication where precise claim locations are unavailable.
+keywords:
+  - "Flood Risk Assessment"
+  - "Spatial Disaggregation"
+  - "Probabilistic Modeling"
+  - "NFIP"
+date: last-modified
+format:
+  html: default
+  pdf: default
+  docx: default
+bibliography: references.bib
+---
+
+# Introduction {#sec-introduction}
+
+Flooding generates over $17 billion in annual economic damage in the United States, ranking as one of the most destructive and pervasive natural hazards confronting communities nationwide [@nws2020; @armal2020]. A March 2019 flooding in eastern Nebraska exemplifies this challenge---an unprecedented event that impacted thousands of properties across multiple states, resulting in substantial financial losses and federal disaster declarations [@crs2019]. In the aftermath of these types of events, understanding which structures sustain flood damage is critical for effective risk management and targeted mitigation strategies.
+
+The National Flood Insurance Program (NFIP) which serves as a vital source for national flood-loss data, anonymizes and aggregates records to preserve policyholder confidentiality. Consequently, planners, emergency managers, and researchers must often rely on aggregated spatial units, significantly limiting their ability to accurately pinpoint and analyze highly localized patterns typical of flood losses. To address this data gap, we introduce an ensemble-based probabilistic spatial disaggregation method specifically designed to link anonymized NFIP claims to individual building footprints. Our approach combines principles from probabilistic record linkage and bootstrap resampling to allocate aggregated claim records to specific structures in a statistically appropriate manner. Rather than replacing existing modeled inundation datasets, our method complements them by integrating actual NFIP claims, thereby offering a more complete picture of flood impacts and enabling identification of previously overlooked micro hotspots of flood damages.
+
+## National Flood Insurance Program {#sec-nfip}
+
+The NFIP, launched in 1968 when private coverage was scarce, now insures millions of properties [@michelkerjan2010; @michelkerjan2010b; @fema2024]. To safeguard policyholder privacy, the Federal Emergency Management Agency (FEMA) releases only aggregated claim data---omitting precise building coordinates and other identifiers---which curtails use of the dataset by planners and researchers who need structure-level loss information to target mitigation. March 2019 flooding in Nebraska exposed this gap: damage spanned multiple jurisdictions, yet the public NFIP file does not reveal building level data on policy claims [@fema2025]. To address these limitations, we propose a probabilistic method that reallocates anonymized claims to individual footprints, bridging the divide between privacy protection and actionable risk assessment.
+
+## Current Approaches and Limitations {#sec-limitations}
+
+Current approaches to flood risk assessment offer valuable but incomplete insights into flood impacts. The First Street Foundation [@fsf2023] has developed detailed property-level inundation models for events like the 2019 Nebraska flood, estimating flood depths at individual parcels and assigning risk ratings based on modeled water levels. Similarly, we have independently derived a detailed flood extent map using remote sensing data. These high-resolution spatial datasets reveal properties that potentially experienced flooding, but neither directly captures dimensions of insured financial losses---they cannot indicate which specific buildings submitted NFIP claims or quantify the magnitude of those losses. Furthermore, while FSF's data provide valuable insights, the high costs associated with bulk API access often preclude widespread usage by local governments, academic researchers, and nonprofit organizations. These limitations in current approaches create an opportunity for methodological innovation in spatial disaggregation of the NFIP data. The challenge lies in developing a method that can reliably connect anonymized claims to specific structures while quantifying the inherent uncertainty in this process.
+
+## Research Objectives and Questions {#sec-objectives}
+
+To address this challenge, our research focuses on developing and validating an ensemble-based spatial disaggregation method through three core questions:
+
+1. How do choices of spatial unit (ZCTA, ZIP, census block group) and attribute filters (flood zone, elevation, construction year) affect claim assignment accuracy, and which configurations yield robust performance?
+
+2. How well do the disaggregated claim assignments align with observed inundation data across two counties, and which conditions influence performance?
+
+3. What practical insights do these building-level likelihoods provide for local floodplain managers and researchers when precise claim locations are unavailable?
+
+# Literature Review {#sec-literature}
+
+## Spatial Disaggregation {#sec-lit-disaggregation}
+
+Methods of spatial disaggregation have evolved from early dasymetric maps into modern ensemble frameworks that leverage progressively richer ancillary data and represent uncertainty more explicitly. Wright [-@wright1936] first used land-cover boundaries to refine population densities, and Tobler's [-@tobler1979] pycnophylactic interpolation introduced volume-preserving smoothing between zones. Subsequent areal-interpolation work by Goodchild and Lam [-@goodchild1980] and Goodchild et al. [-@goodchild1993] formalized proportional transfer across intersecting polygons, establishing the baseline "areal-weighting" paradigm. Multi-class dasymetric studies then sharpened these surfaces with satellite land-cover and parcel attributes [@langford1994; @fisher1996; @yuan1997; @eicher2001; @mennis2006]. More recent applications harness social-media check-ins and night-time lights [@comber2019]. As researchers sought to quantify error, ancillary data were embedded in expectation-maximization, regression or geostatistical models [@flowerdew1994; @kyriakidis2004; @wu2005], and Bayesian or copula-based schemes propagated variance across scales [@bradley2016; @custer2018]. Today, hybrid machine learning ensembles combine dasymetric, geostatistical and deep-learning components, achieving state-of-the-art accuracy while systematically characterizing uncertainty [@patil2024].
+
+## Probabilistic Record Linkage {#sec-lit-linkage}
+
+Fellegi and Sunter's classic model [-@fellegi1969] cast record linkage as a classification problem, weighting field agreements with m- and u- probabilities and setting decision thresholds that still anchor modern practice. Later refinements improved both estimation and scalability: Jaro [-@jaro1989] and Winkler [-@winkler1988] introduced the EM algorithm to infer agreement probabilities from data, while Winkler [-@winkler2000] and Herzog et al. [-@herzog2007] surveyed blocking, indexing, and advanced string metrics that enable large-scale implementations.
+
+Building on this foundation, Bayesian and machine learning approaches treat match status as a latent variable, place priors on agreement parameters, and return posterior match probabilities that propagate through downstream analyses [@fortini2001; @larsen2002; @larsen2005; @tancredi2011; @sadinle2017]. Open-source toolkits such as fastLink and Splink combine probabilistic weighting with supervised learning and distributed computing to link millions of administrative records efficiently [@enamorado2019; @linacre2022]. Probabilistic linkage is especially critical in spatial applications where datasets lack unique identifiers: recent work, for example, links overlapping LiDAR tree inventories while jointly modelling positional error and growth dynamics [@drew2025], and similar methods underpin studies in geographic epidemiology and historical map reconciliation. Across these use cases, Bayesian and machine learning linkers not only improve match quality but, crucially, provide an explicit confidence measure for every candidate pair---information we later propagate through our flood-claim disaggregation ensemble.
+
+## Bootstrap Sampling and Uncertainty Quantification {#sec-lit-bootstrap}
+
+Bootstrapping was introduced by Efron [-@efron1979] as a method to quantify uncertainty without strong parametric assumptions. By repeatedly resampling the data and recalculating results, one can empirically estimate the sampling distribution of almost any statistic. This approach, later popularized by Efron & Tibshirani [-@efron1993], provides confidence intervals and error estimates, and it has become a staple for error propagation in spatial analysis as well [@davison1997]. A key advantage to this approach is its flexibility; bootstraps can be applied to complex spatial models where analytic error formulas are intractable.
+
+This ensemble approach shares methodological parallels with bootstrap aggregating (bagging), introduced by Breiman [-@breiman1996]. Both approaches rely on creating multiple bootstrap samples and aggregating their outcomes to produce robust estimates with quantified uncertainty; bagging typically targets predictive accuracy in classification and regression, whereas the present implementation addresses probabilistic spatial record linkage under anonymization constraints.
+
+## Error Propagation in Spatial Analysis {#sec-lit-error}
+
+Many spatial researchers have adopted bootstrap and related Monte Carlo methods to gauge the reliability of spatial predictions. For example, Heuvelink [-@heuvelink1998] detailed techniques for stochastic error propagation in GIS, laying groundwork for using resampling to assess uncertainty in map outputs. In practice, this means treating input data or model residuals as samples to generate multiple plausible realizations of the data or model output. Applications range from interpolated surfaces to location-allocation models. One hydrology study illustrates this well: Zhang et al. [-@zhang2018] use a bootstrap approach to quantify how uncertainty in rainfall measurements translates into uncertainty in modeled runoff. They resampled rain gauge data to produce numerous rainfall maps, ran each through a hydrological simulation, and then examined the spread of the resulting streamflow predictions. This bootstrapping of inputs revealed the sensitivity of flood modeling to rain spatial patterns and provided error bounds for the simulations. Similarly, in spatial epidemiology and ecology, moving-block bootstraps are used when data are spatially autocorrelated.
+
+## Flood Risk Assessment and NFIP Claims Data {#sec-lit-flood}
+
+Analyses of NFIP claims have been crucial for understanding flood loss patterns. For example, Highfield et al. [-@highfield2013], after examining NFIP claims in Texas, questioned the adequacy of the 100-year floodplain as a comprehensive risk metric. They found that significant damage frequently occurs outside these officially mapped high-risk zones, highlighting the limitations of relying solely on regulatory maps for true risk assessment. In a subsequent landmark study, Kousky & Michel-Kerjan [-@kousky2015] conducted a nationwide analysis of more than 35 years of NFIP claims, distilling "six key findings" about flood insurance losses. They quantified patterns such as the concentration of repetitive losses, the distribution of claims between major events, chronic flooding, and the NFIP's overall financial performance. This extensive data analysis established a clearer understanding of flood loss characteristics, revealing key principles---such as a small fraction of properties accounting for a large share of claims---that have become foundational to many subsequent risk models.
+
+### Spatial Risk Modeling with Claims {#sec-lit-spatial}
+
+Researchers have increasingly used NFIP claims to calibrate and validate flood-risk models. Blessing et al. [-@blessing2017] evaluated the proportion of losses captured by current flood-hazard delineations; by overlaying historical claims on flood maps they showed that a notable portion of damage occurs outside designated floodplains, suggesting that official maps under-represent true risk. Such findings have spurred improvements in risk mapping. Brody et al. [-@brody2014] combined land-use data with NFIP claims and found that increased impervious cover and loss of wetlands correlate with higher claim frequencies and payouts, underscoring the role of planning in flood-loss mitigation [@brody2008; @brody2009; @zahran2010]. On a national scale, Wing et al. [-@wing2018] fused an advanced flood-hazard model with exposure data and validated results against recorded NFIP losses to estimate present and future flood risks across the conterminous United States. Their ensemble of climate and hydrologic simulations aligned modeled loss distributions with observed claims, revealing far more Americans at risk than previously thought and illustrating the power of integrating NFIP big-data resources with physics-based models.
+
+Wagner [-@wagner2022] demonstrates that publicly available NFIP data can support economic and policy analysis at sub-county scales by linking aggregated records to census tracts. The present study extends this line of work to building-level matching with explicit uncertainty quantification.
+
+### Probabilistic Loss Estimation {#sec-lit-probabilistic}
+
+A significant recent advancement is the move toward probabilistic methods in flood risk assessment. Traditional approaches used deterministic depth-damage curves; however, studies leveraging NFIP claims have revealed large variability. Wing et al. [-@wing2020], using over two million NFIP claims, demonstrated that actual building losses do not follow the simple monotonic depth-damage assumption. Instead, the relationship is better described by a probabilistic beta distribution---shallow floods sometimes cause surprisingly high damage and vice versa. They argue that uncertainty in flood losses has been the main bottleneck in flood risk studies, and their empirical analysis shows the need to replace deterministic curves with probabilistic damage functions. In line with this, McGrath et al. [-@mcgrath2019] developed probabilistic depth-damage curves for buildings, explicitly modeling the variance in damage outcomes at each depth. Such models output a distribution of possible losses rather than a single value, improving loss estimates for modeling and benefit-cost analysis of mitigation. Additionally, efforts like Dottori et al. [-@dottori2016] use Monte Carlo simulations to produce synthetic damage datasets, integrating cost uncertainties in a flood loss model. These probabilistic approaches allow risk managers to calculate metrics like exceedance probability curves for losses or the likelihood of insurance portfolio outcomes under various scenarios.
+
+In summary, the literature demonstrates significant advancements in spatial disaggregation, probabilistic record linkage, and methods for uncertainty quantification such as bootstrap sampling and ensemble techniques. Concurrently, research utilizing NFIP claims data highlights both its immense value and the persistent challenges posed by data aggregation for fine-scaled flood risk assessment. While these fields offer powerful tools, a critical need remains for a method that integrates these approaches to probabilistically disaggregate anonymized flood claims to individual building footprints while rigorously quantifying the inherent uncertainties.
+
+# Data and Methods {#sec-methods}
+
+## NFIP Data {#sec-data-nfip}
+
+The OpenFEMA NFIP claims file [@fema_openfema_claims] provides anonymized claim records with reported ZIP code, flood zone, base flood elevation (BFE), occupancy type, construction date, and coarse latitude/longitude (rounded to 0.1 degrees), along with census block group identifiers. Each record carries a unique claim identifier that supports linkage without revealing policyholder locations. We restrict the analysis to occupancyType=1 (single-family residential). For March 2019, this yields 261 claims in Dodge County and 204 claims in Douglas County; non-residential claims are excluded. Reported ZIP codes are treated as ZCTA identifiers for claims, while buildings are assigned ZCTA via TIGER/Line polygons. Although OpenFEMA includes latitude/longitude and census block group fields, we do not use them in the baseline because the coordinates are coarse and often fall outside county boundaries (5 of 261 Dodge claims; 50 of 204 Douglas claims). These fields are evaluated in sensitivity analyses.
+
+To test multi-event performance, we also extract the 2011 "Late spring storms" event for Cass and Dakota Counties (115 and 46 residential claims, respectively). Because NFHL coverage for those counties is incomplete in our inputs, the 2011 replication uses ZIP-only matching without flood-zone constraints.
+
+We also use the OpenFEMA policies file [@fema_openfema_policies] to characterize insurance coverage and compare policy-derived spatial distributions with claim-derived distributions for the same event window. Policies are not disaggregated in the main algorithm; they are used to contextualize candidate pools and penetration rates.
+
+For external validation, we use the OpenFEMA Housing Assistance Owners dataset [@fema_openfema_housing_assistance] to compare ZIP-level claim likelihoods with FEMA Individual Assistance totals for disasters 4420 (2019) and 4013 (2011). We also use 2019 ACS ZCTA housing and income estimates [@census_acs_2019] to contextualize policy uptake.
+
+In this analysis, NFIP records are integrated with ancillary datasets, including the Microsoft building footprint [@microsoft2018] and supplementary geographic data such as USGS 3DEP elevation. These additional data sources provide the necessary context for disaggregating the claim records into building-based estimates. Thus, by applying a probabilistic matching framework---which leverages shared spatial characteristics such as flood zone, census block, and building type---we can refine the allocation of claims to potential building locations. This integrated approach not only mitigates the limitations imposed by the aggregated nature of the NFIP data but also enables subsequent spatial analyses, such as the calculation of Moran's I and hotspot detection.
+
+## Building Footprint Data {#sec-data-buildings}
+
+The Microsoft Building Footprints dataset provides the core spatial framework for linking aggregated NFIP claims to individual structures. This dataset comprises high-resolution building polygons generated via computer-vision techniques applied to aerial imagery, encompassing both urban and rural areas of eastern Nebraska. While the base dataset includes only building geometries, we enhance it with Nebraska statewide parcel-assessor records (2023; proprietary data available for purchase from the State of Nebraska), which provide structural characteristics such as land-use/classification codes, assessed improvement values, parcel ZIP codes, and year of construction. These attributes support the largest-building-per-parcel filter and the construction-year sensitivity test described below. Microsoft Building Footprints were selected for their statewide coverage and compatibility with parcel joins; alternative structure datasets (e.g., National Structures Inventory or FEMA structures) could be substituted in future applications.
+
+Each building footprint was assigned a unique identifier and linked to its corresponding attributes in a unified database, thereby aligning structural details with the building's precise location. This integration step was especially critical for the subsequent probabilistic matching of aggregated NFIP claims to potential building candidates. By incorporating attributes such as building value or construction year, the matching algorithm could better narrow the set of candidate structures for each claim group, improving the fidelity of the final disaggregation. Ultimately, these enriched building footprints serve as the essential spatial reference points for modeling how NFIP claims are distributed at the level of individual structures.
+
+## Event-Specific Inundation Layer {#sec-data-inundation}
+
+To create an observed flood footprint for validating the disaggregation algorithm, we refined the flood-inundation polygon originally created by the Nebraska Department of Natural Resources [@nednr2019]. The polygon was derived from the earliest cloud-free Sentinel-2 scene collected on 16 March 2019, classifying water pixels with Normalized Difference Moisture and Snow indices. Because flood waters peaked in Dodge County several days earlier---around 13 March 2019 [@flanagan2020; @calloway2022]---surface water had already receded in some areas by the time of image acquisition. Visual inspection revealed darker, moisture-stained patches outside the NeDNR boundary, surfaces that had been inundated but were no longer water-covered.
+
+To capture these recession zones, we trained a supervised Support Vector Machine on manually selected Sentinel-2 training samples representing (i) clearly water-covered pixels and (ii) the darker, recently saturated soils. The classifier's output was rasterized, converted to vector, and merged with the original NeDNR polygon to yield an expanded composite mask. Manual on-screen review confirmed that the composite captured all visually discernible flood signatures present in the 16 March imagery.
+
+For robustness, we ran discrimination metrics after randomly perturbing the "flooded" labels of buildings located within a 25-ft buffer of the composite mask; receiver-operating-characteristic performance remained effectively unchanged, indicating that modest spatial uncertainty in the inundation layer does not materially influence model evaluation.
+
+## Data Sources and Versions {#sec-data-sources}
+
+| Dataset | Source | Year / version | Key fields | Notes |
+|---|---|---|---|---|
+| NFIP claims | OpenFEMA [@fema_openfema_claims] | March 2019 event | reportedZipCode, floodZoneCurrent, baseFloodElevation, occupancyType, latitude/longitude, censusBlockGroupFips | occupancyType=1; 261 Dodge, 204 Douglas |
+| NFIP policies | OpenFEMA [@fema_openfema_policies] | In-force March 2019 | reportedZipCode, floodZoneCurrent, policyCount | used for coverage context |
+| FEMA housing assistance | OpenFEMA [@fema_openfema_housing_assistance] | Disaster 4420 (2019) and 4013 (2011) | zipCode, validRegistrations, approvedForFemaAssistance, totalApprovedIhpAmount | ZIP-level external validation |
+| Flood hazard (NFHL) | FEMA NFHL [@fema_nfhl] | DFIRM_ID 31053C (Dodge); 31055C (DBREV_DT 2025-03-25) | FLD_ZONE, SFHA_TF | flood-zone matching |
+| Building footprints | Microsoft Building Footprints [@microsoft2018] | 2018 release | building polygons | joined to parcels |
+| Parcel assessor data | Nebraska statewide parcels | 2023 | BuildingYear, Total_Assessed_Value, Classification_Code, Parcel ZIP | building attributes |
+| ZCTA boundaries | U.S. Census TIGER/Line [@census_zcta_2022] | 2022 | ZCTA5CE20 | building ZCTA assignment |
+| Census block groups | U.S. Census TIGER/Line [@census_cbg_2020] | 2020 | GEOID | sensitivity analysis |
+| ACS housing/income | U.S. Census ACS 5-year [@census_acs_2019] | 2019 | housing units, tenure, median income | policy uptake context (ZCTA) |
+| Elevation | USGS 3DEP 10 m [@usgs_3dep] | tiles covering study area | elevation, slope | BFE filter and slope sensitivity |
+| Inundation footprint | Nebraska DNR + Sentinel-2 [@nednr2019] | March 2019 | flood extent | validation layer |
+
+## Geographic and Flood-Zone Distribution {#sec-data-distribution}
+
+Flood-zone designations provide critical context for understanding the risk environment of affected properties. Of the 261 Dodge County claims, 254 fall inside the Special Flood-Hazard Area (SFHA), primarily Zone AE with smaller counts in Zone AO and legacy A-sub-zones; the remaining seven claims fall in Zone X/B. In Douglas County, 198 of 204 claims fall in SFHA, with the remainder in Zone X or other A-sub-zones and one missing flood-zone code. Policies in force during March 2019 total 868 in Dodge (823 in SFHA) and 1,068 in Douglas (797 in SFHA), implying SFHA policy penetration of roughly 0.29--0.30 when compared to the candidate building stock. Because Zone X records do not include Base Flood Elevation (BFE) values, the elevation filter can be enforced for nearly all SFHA records but not for the small number of Zone X claims and policies, which must rely on the coarser spatial constraints.
+
+## Methodological Framework {#sec-methods-framework}
+
+Our approach employs a three-stage probabilistic framework that transforms aggregate-level claim data into building-specific probability distributions. This methodology systematically narrows potential building matches while quantifying the inherent uncertainty in claim allocation.
+
+The first stage establishes logical groupings of NFIP claims that share identical spatial and structural attributes. For each claim, we extract ZCTA (reported ZIP), FEMA flood zone designation, and occupancy classification. Claims sharing identical attribute combinations are grouped together, maintaining the fidelity of the original data while reducing computational complexity. This grouping mechanism facilitates efficient parallel execution during subsequent stages, as each constraint group can be evaluated independently.
+
+Following grouping, we identify candidate buildings for each claim through a hierarchical filtering process that progressively narrows potential matches. We first filter out nonresidential buildings and, for the baseline configuration, retain only the largest building footprint per parcel. We then apply spatial constraints to include only buildings within the same ZCTA and flood zone as the claim, collapsing A-subzones to Zone A and mapping legacy Zone B to Zone X for consistency. Optional filters include BFE-based elevation tolerance (+/-0.5 ft), construction-year tolerance, assessed-value tolerance based on parcel improvement values, slope thresholds derived from 3DEP elevation, and a distance-to-SFHA threshold (<=500 m) applied to Zone X claims. Each filter is applied only when relevant fields are available and only if it does not eliminate all candidates, ensuring Zone X claims without BFE values still yield matches.
+
+Unless otherwise noted, the analyses that follow use a parsimonious baseline configuration: largest building per parcel with ZCTA and FEMA flood-zone matching. This configuration balances discrimination, calibration, and interpretability and serves as the reference specification for all sensitivity experiments.
+
+## Bootstrap Assignment {#sec-methods-bootstrap}
+
+Instead of deterministically selecting a single most likely match for each claim, our methodology employs a bootstrap sampling procedure. This approach inherently generates an ensemble of results by recalculating across multiple samples. For every NFIP claim (policy $p$), we perform $n$ independent draws with replacement from its pool of candidate structures, selecting one candidate structure per draw. Candidates are sampled uniformly after filtering; filters constrain the candidate set rather than impose a ranking rule. The collection of these $n$ draws for each claim constitutes the bootstrap ensemble.
+
+The primary output of this stage is a dataset of raw bootstrap selection counts, structured as a building $\times$ claim $\times$ count matrix. These per-claim selection counts indicate how many times each candidate building $b$ was drawn for a given NFIP policy $p$ during the $n$ bootstrap iterations performed for that policy. The algorithm subsequently uses these counts to derive measures of claim likelihood. These raw counts represent the model's foundational output, prior to the normalization and aggregation steps detailed below, and can be used to develop various analytical products to meet specific research or practical needs.
+
+For the primary building-level validation in this study, these raw counts are aggregated across all matched claims. We sum the per-policy bootstrap selection counts ($c_{p,b}$) for each building across all policies ($p$) for which it was a candidate, yielding a total aggregated bootstrap count ($C_b^{agg}$) for that building (see Appendix for full mathematical formulation). We then normalize by the total number of draws across all matched claims, $n \times N_{\text{matched}}$, to obtain a building-level likelihood score:
+
+$$L_b = C_b^{agg} / (n \times N_{\text{matched}})$$ {#eq-likelihood}
+
+where $N_{\text{matched}}$ is the number of claims with at least one viable candidate. This score can be interpreted as an index of evidence reflecting the strength and consistency of a building's selection across the relevant claims, rather than a formal probability in the classical sense. The resulting scores are used to compute discrimination and calibration statistics in @sec-results.
+
+## Naive Spatial Aggregation Baselines {#sec-methods-baselines}
+
+To effectively benchmark our model, we first estimated four naive models in which every structure within a coarse spatial unit receives the same claim probability. Spatial units were defined (1) by ZCTA and (2) by the intersection of ZCTA with FEMA flood-zone boundaries; each definition was applied to all mapped buildings and, separately, to only the largest building on each parcel.
+
+For a unit $g$ containing $N_g$ buildings and $C_g$ recorded claims, the probability $P_b$ assigned to any specific building within that unit is calculated as:
+
+$$P_b = C_g / N_g$$ {#eq-naive}
+
+This formula represents the probability that building $b$ is selected by at least one claim within that spatial unit.
+
+| Spatial Constraints | Building Selection | ROC-AUC | PR-AUC | Brier Score | Log-Loss |
+|---------------------|-------------------|---------|--------|-------------|----------|
+| ZCTA | All Buildings | 0.812 | 0.491 | 0.096 | 0.611 |
+| ZCTA | Largest Building | 0.829 | 0.501 | 0.056 | 0.439 |
+| ZCTA + FZ | All Buildings | 0.860 | 0.734 | 0.090 | 0.927 |
+| ZCTA + FZ | Largest Building | 0.870 | 0.722 | 0.048 | 0.508 |
+
+: Naive Model Results (Dodge County, March 2019) {#tbl-naive}
+
+## Sensitivity and Robustness Tests {#sec-methods-sensitivity}
+
+Beyond the baseline ZCTA+flood-zone configuration, we conduct focused sensitivity tests to address data and specification uncertainties. We compare spatial units (ZIP, ZCTA, census block group), evaluate whether coarse OpenFEMA latitude/longitude can further constrain candidate pools, test construction-year tolerances (exact match and +/-5 years), and assess slope and distance-to-SFHA filters intended to improve matching for outside-floodplain claims. We also compare the spatial distribution of bootstrapped claim likelihoods to distributions derived from in-force NFIP policies to contextualize coverage and penetration. External validation aggregates building-level likelihoods to ZIPs and compares them to FEMA Housing Assistance Owners totals for disasters 4420 (2019) and 4013 (2011) using Pearson and Spearman correlations. Finally, we stratify claims by total payment (<= median, median--P90, > P90) to assess sensitivity to loss-size heterogeneity. These tests hold the largest-building-per-parcel filter constant unless otherwise noted.
+
+# Results {#sec-results}
+
+## Baseline Performance and Candidate Pools {#sec-results-performance}
+
+Using the baseline ZCTA+flood-zone configuration with the largest-building-per-parcel filter, the model matches 260 of 261 Dodge County claims and 198 of 204 Douglas County claims. Candidate pools are large but tractable: Dodge has a mean of 892 candidates per claim (median 872; max 8,199) with 6,552 buildings receiving nonzero probability; Douglas has a mean of 790 candidates per claim (median 839; max 8,214) with 5,575 buildings receiving nonzero probability. The unmatched Dodge claim is in ZIP 68056 (Zone A04); the six unmatched Douglas claims are in rare flood-zone codes (e.g., A09) or missing zone codes.
+
+Validation against the inundation footprint indicates strong discrimination for the baseline ZCTA+flood-zone configuration (ROC-AUC 0.960 in Dodge; 0.939 in Douglas) with high precision--recall performance (PR-AUC 0.862 and 0.701, respectively).
+
+Figures @fig-roc-curves and @fig-pr-curves summarize discrimination across variants, while @fig-calibration and @fig-metric-comparison report calibration and aggregate metric comparisons.
+
+![](figures/fig_roc_curves.png){#fig-roc-curves fig-cap="Receiver operating characteristic curves for baseline and sensitivity variants in Dodge and Douglas Counties."}
+
+![](figures/fig_pr_curves.png){#fig-pr-curves fig-cap="Precision--recall curves for baseline and sensitivity variants in Dodge and Douglas Counties."}
+
+![](figures/fig_calibration.png){#fig-calibration fig-cap="Calibration plots for the baseline model using decile (quantile) bins; x-axis is log-scaled to show low predicted probabilities."}
+
+![](figures/fig_metric_comparison.png){#fig-metric-comparison fig-cap="ROC-AUC, PR-AUC, and Brier score comparisons across spatial-unit variants."}
+
+## Spatial Likelihood Surfaces {#sec-results-maps}
+
+Figures @fig-hex-dodge and @fig-hex-douglas summarize county-level hex aggregations of bootstrap draw counts, while @fig-zoom-dodge and @fig-zoom-douglas highlight zoomed building-footprint detail for a high-frequency area in each county. These views emphasize spatial clustering along mapped floodplains and channel-adjacent corridors.
+
+![](figures/fig_hex_dodge.png){#fig-hex-dodge fig-cap="County-level hex aggregation of bootstrapped draw counts for Dodge County with the inundation footprint overlay."}
+
+![](figures/fig_hex_douglas.png){#fig-hex-douglas fig-cap="County-level hex aggregation of bootstrapped draw counts for Douglas County with the inundation footprint overlay."}
+
+![](figures/fig_zoom_dodge.png){#fig-zoom-dodge fig-cap="Zoomed building footprints in a high-frequency area of Dodge County with the inundation footprint overlay."}
+
+![](figures/fig_zoom_douglas.png){#fig-zoom-douglas fig-cap="Zoomed building footprints in a high-frequency area of Douglas County with the inundation footprint overlay."}
+
+## Spatial-Unit Sensitivity {#sec-results-spatial}
+
+Table @tbl-spatial-units compares spatial-unit choices while holding other filters constant. ZCTA performs comparably to ZIP and avoids temporal instability in ZIP boundaries. Census block groups increase precision--recall in some cases but reduce ROC-AUC and calibration, indicating a narrower candidate pool that can over-concentrate probabilities.
+
+| County | Variant | Matched claims | ROC-AUC | PR-AUC | Brier |
+|---|---|---:|---:|---:|---:|
+| Dodge | ZIP + FZ | 260 | 0.969 | 0.874 | 0.221 |
+| Dodge | ZCTA + FZ | 260 | 0.960 | 0.862 | 0.249 |
+| Dodge | CBG + FZ | 251 | 0.881 | 0.903 | 0.590 |
+| Douglas | ZIP + FZ | 198 | 0.946 | 0.702 | 0.185 |
+| Douglas | ZCTA + FZ | 198 | 0.939 | 0.701 | 0.199 |
+| Douglas | CBG + FZ | 196 | 0.880 | 0.771 | 0.359 |
+
+: Spatial-Unit Sensitivity Results {#tbl-spatial-units}
+
+## Latitude/Longitude and Construction-Year Sensitivity {#sec-results-latlon}
+
+OpenFEMA latitude/longitude fields are rounded to 0.1 degrees and often fall outside county boundaries (5 of 261 Dodge claims; 50 of 204 Douglas claims). When used as a strict filter, discrimination declines in Douglas (ROC-AUC 0.925). A weighted approach that down-weights distant candidates performs comparably to the ZCTA baseline (ROC-AUC 0.970 in Dodge; 0.945 in Douglas), but does not improve calibration enough to justify inclusion in the baseline.
+
+Construction-year matching is also sensitive to data coverage. Exact-year matching substantially reduces performance (ROC-AUC 0.627 Dodge; 0.810 Douglas), while a +/-5-year tolerance yields performance comparable to baseline (ROC-AUC 0.963 Dodge; 0.950 Douglas). Given incomplete year coverage in Dodge County parcel data, construction year is retained as a sensitivity test rather than a core constraint.
+
+## Topographic and SFHA-Distance Filters {#sec-results-topo}
+
+We evaluate two additional covariates to improve matches outside mapped floodplains: a slope threshold (<=2 degrees) derived from 3DEP elevation and a distance-to-SFHA threshold (<=500 m) applied only to Zone X claims. Table @tbl-covariates shows that slope filtering modestly improves discrimination and precision--recall in both counties, while the SFHA-distance filter yields limited or mixed changes in aggregate metrics.
+
+| County | Variant | Matched claims | ROC-AUC | PR-AUC | Brier |
+|---|---|---:|---:|---:|---:|
+| Dodge | ZIP + FZ | 260 | 0.969 | 0.874 | 0.221 |
+| Dodge | ZIP + FZ + slope <= 2° | 260 | 0.973 | 0.885 | 0.218 |
+| Dodge | ZIP + FZ + dist <= 500 m (Zone X) | 260 | 0.960 | 0.875 | 0.285 |
+| Douglas | ZIP + FZ | 198 | 0.946 | 0.702 | 0.185 |
+| Douglas | ZIP + FZ + slope <= 2° | 198 | 0.959 | 0.774 | 0.209 |
+| Douglas | ZIP + FZ + dist <= 500 m (Zone X) | 198 | 0.938 | 0.700 | 0.200 |
+
+: Additional Covariate Sensitivity Results {#tbl-covariates}
+
+## Loss-Size Stratification {#sec-results-loss}
+
+To assess sensitivity to loss-size heterogeneity, we stratify claims by total payment (<= median, median--P90, > P90). Table @tbl-payment-strata shows that high-loss strata are more variable, especially in Douglas County, where the highest-payment group is small and discrimination deteriorates.
+
+| County | Stratum | Claims | ROC-AUC | PR-AUC | Brier |
+|---|---|---:|---:|---:|---:|
+| Dodge | <= median | 131 | 0.944 | 0.864 | 0.378 |
+| Dodge | median--P90 | 104 | 0.952 | 0.898 | 0.386 |
+| Dodge | > P90 | 26 | 0.978 | 0.939 | 0.298 |
+| Douglas | <= median | 102 | 0.936 | 0.709 | 0.217 |
+| Douglas | median--P90 | 81 | 0.859 | 0.731 | 0.402 |
+| Douglas | > P90 | 21 | 0.368 | 0.567 | 0.648 |
+
+: Loss-Size Stratification Results {#tbl-payment-strata}
+
+## External Validation and Multi-Event Replication {#sec-results-ia}
+
+We aggregate building-level likelihoods to ZIPs and compare them to FEMA Housing Assistance Owners totals for disasters 4420 (2019) and 4013 (2011). Table @tbl-ia-validation reports Pearson and Spearman correlations with total approved IHP amounts and approved counts. The 2019 correlations are high in both counties. The 2011 replication (Cass and Dakota Counties) uses ZIP-only matching because NFHL coverage is unavailable for those counties in our inputs; match rates are high (Cass 114 of 115 claims; Dakota 46 of 46 claims), but ZIP counts are small (2--3), so correlations should be interpreted cautiously.
+
+| Event | County | ZIPs | Pearson (IHP total) | Spearman (IHP total) | Pearson (approved count) | Spearman (approved count) |
+|---|---|---:|---:|---:|---:|---:|
+| 2019 Midwest flood | Dodge | 7 | 0.990 | 0.964 | 0.996 | 0.937 |
+| 2019 Midwest flood | Douglas | 6 | 0.963 | 0.812 | 0.962 | 0.812 |
+| 2011 late spring storms | Cass | 2 | -1.000 | -1.000 | -1.000 | -1.000 |
+| 2011 late spring storms | Dakota | 3 | 0.903 | 0.500 | 0.907 | 1.000 |
+
+: FEMA Housing Assistance Validation (ZIP aggregates) {#tbl-ia-validation}
+
+## Policy vs. Claim Distributions {#sec-results-policies}
+
+Policy-based bootstraps provide a coverage benchmark for the claim-based likelihoods. Table @tbl-policy-claims shows that policy distributions are more diffuse than claim distributions, reflecting partial insurance penetration. In Dodge County, the policy and claim distributions differ significantly (KS = 0.271, $p < 10^{-200}$) but are positively correlated across buildings (Pearson $r = 0.729$, $n = 6{,}180$). In Douglas County, distributions differ sharply (KS = 0.909, $p \approx 0$) yet retain strong rank correlation (Pearson $r = 0.955$, $n = 4{,}952$).
+ACS ZCTA-level housing counts indicate low median uptake in both counties (median 0.011 in Dodge; 0.002 in Douglas), consistent with substantial uninsured exposure even within SFHAs.
+
+| County | Group | Mean | Median | P95 | P99 |
+|---|---|---:|---:|---:|---:|
+| Dodge | Claims | 0.0001600 | 0.0000080 | 0.0008460 | 0.0009410 |
+| Dodge | Policies | 0.0000881 | 0.0000060 | 0.0004160 | 0.0004460 |
+| Douglas | Claims | 0.0001850 | 0.0000050 | 0.0008380 | 0.0009030 |
+| Douglas | Policies | 0.0000101 | 0.0000020 | 0.0000070 | 0.0003760 |
+
+: Policy vs. Claim Probability Distributions {#tbl-policy-claims}
+
+# Discussion {#sec-discussion}
+
+This study demonstrates a transparent, reproducible approach for disaggregating anonymized NFIP claims to building footprints using only public data. The primary contribution is not a new matching algorithm, but a workflow that produces building-level likelihood surfaces and uncertainty diagnostics that can be integrated with flood-inundation mapping and local mitigation planning. The strong discrimination observed in both Dodge and Douglas Counties, along with high ZIP-level correlations to FEMA housing assistance totals, suggests that ZIP/flood-zone constraints capture meaningful spatial signal even when exact claim locations are unavailable.
+
+The method serves practitioners and researchers working with publicly available data, for whom confidential NFIP coordinates are inaccessible. Although FOIA requests can yield more precise locations, such requests involve processing delays and are not routinely feasible for local governments or time-sensitive post-event analysis. In this context, disaggregated likelihood scores can support post-event assessments, micro-hotspot identification, and communication about where insured losses were concentrated. These outputs should not be interpreted as direct forecasts of future losses; rather, they offer a structured way to spatialize historical claim evidence under anonymization constraints.
+Loss-size stratification underscores this point: upper-tail performance is noisy, consistent with fat-tailed loss behavior that limits deterministic prediction from historical claims alone.
+
+Several limitations warrant emphasis. NFHL flood-zone boundaries may be outdated or inconsistent with event conditions, and insurance penetration within SFHAs is far from universal (approximately 0.29--0.30 in both counties). ZCTA boundaries are a stable proxy for ZIP codes but reflect 2022 geometry rather than 2019, introducing temporal mismatch. OpenFEMA latitude/longitude fields are coarse and can fall outside county boundaries, limiting their utility for fine-scale matching. Construction-year data are incomplete in some counties, and the primary validation relies on a remote-sensing inundation footprint; the external FEMA housing assistance validation is aggregated to ZIPs and relies on small ZIP counts for the 2011 replication. Loss-size strata also become small in the upper tail, making high-loss results noisier. Finally, the analysis spans two Nebraska events and four counties; broader generalizability requires additional regions and flood types.
+
+Future research should extend this workflow across additional flood events and regions, incorporate covariates such as distance to water bodies, drainage infrastructure, and land-cover characteristics, and evaluate performance where repeat claims are observed. Integrating policy uptake models with disaggregation outputs would further illuminate uninsured exposure.
+
+# Conclusion {#sec-conclusion}
+
+We present a probabilistic disaggregation workflow that maps aggregated NFIP claims to building footprints while preserving privacy. Using March 2019 flooding in Nebraska, the ZCTA+flood-zone baseline performs strongly in both Dodge and Douglas Counties and yields building-level likelihood surfaces suitable for post-event analysis and risk communication. Slope and distance-to-SFHA filters provide additional covariate checks, and loss-size stratification highlights greater variability in the upper tail. A ZIP-level comparison to FEMA housing assistance totals and a 2011 replication in Cass and Dakota Counties add external and multi-event context. These results support the use of public NFIP data for spatially explicit loss assessment and provide a foundation for broader multi-region validation.
+
+# Data and Code Availability {#sec-availability}
+
+Code, derived outputs, and documentation are available at https://github.com/jrandre2/NFIP-Disaggregation-CENTAUR. All input datasets are publicly available from OpenFEMA, FEMA NFHL, USGS 3DEP, and the U.S. Census Bureau; Nebraska parcel data are sourced from statewide assessor records.
+
+# References {.unnumbered}
+
+::: {#refs}
+:::
+
+# Appendix A. Likelihood Score Formulation {.unnumbered}
+
+This appendix provides the mathematical formulation for the building-level likelihood score used in the bootstrap disaggregation.
+
+Let $p$ index claims and $b$ index buildings. For each claim $p$, the algorithm draws one candidate building per iteration from its candidate set $S_p$ for a total of $n$ iterations. Let $c_{p,b}$ denote the number of times building $b$ is selected for claim $p$ across the $n$ draws. The aggregated count for building $b$ is:
+
+$$C_b^{agg} = \sum_{p \in P} c_{p,b}$$
+
+where $P$ denotes the set of matched claims (claims with at least one candidate). The building-level likelihood score is then:
+
+$$L_b = \frac{C_b^{agg}}{n \times N_{\text{matched}}}$$
+
+where $N_{\text{matched}}$ is the number of matched claims. In this study, we set $n = 1000$ bootstrap iterations per claim. The resulting $L_b$ values are interpreted as relative evidence indices for claim association rather than formal probabilities.

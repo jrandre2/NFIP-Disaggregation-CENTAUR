@@ -1,0 +1,15 @@
+---
+title: "Appendix A. Likelihood Score Formulation"
+---
+
+This appendix provides the mathematical formulation for the building-level likelihood score used in the bootstrap disaggregation.
+
+Let $p$ index claims and $b$ index buildings. For each claim $p$, the algorithm draws one candidate building per iteration from its candidate set $S_p$ for a total of $n$ iterations. Let $c_{p,b}$ denote the number of times building $b$ is selected for claim $p$ across the $n$ draws. The aggregated count for building $b$ is:
+
+$$C_b^{agg} = \sum_{p \in P} c_{p,b}$$
+
+where $P$ denotes the set of matched claims (claims with at least one candidate). The building-level likelihood score is then:
+
+$$L_b = \frac{C_b^{agg}}{n \times N_{\text{matched}}}$$
+
+where $N_{\text{matched}}$ is the number of matched claims. In this study, we set $n = 1000$ bootstrap iterations per claim. The resulting $L_b$ values are interpreted as relative evidence indices for claim association rather than formal probabilities.

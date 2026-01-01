@@ -1,0 +1,65 @@
+RA-00555-2025
+An Approach to Probabilistic Disaggregation of National Flood Insurance Program (NFIP) Claims onto Building Footprints
+
+Dear Dr. Tang,
+
+After a careful review of your paper, I have concluded that major revisions are necessary before it can be considered for publication.
+
+Please refer to the comments from the reviewers below, particularly addressing the serious concerns of Reviewer 2 in a revision, with an explanation of your responses and revisions.
+
+Our journal is currently transitioning to Wiley’s Research Exchange submission portal. Please read these instructions carefully.
+
+If you submitted your manuscript through our Research Exchange site, you will see a link below to submit your revised manuscript: https://nam04.safelinks.protection.outlook.com/?url=https%3A%2F%2Furldefense.com%2Fv3%2F__https%3A%2F%2Fwiley.atyponrex.com%2FsubmissionBoard%2F1%2F0b89abbe-6440-4eb7-b27f-cd22ac2511ec%2Fcurrent__%3B!!PvXuogZ4sRB2p-tU!Bg2Bf459tvAK02QUrIvrwsmOVMdpjku4PofGv53o22u4Y88krgE8HUiKBoug-6hx7-BHN4ttvZ9DKzDQXSLKKsOjNiw%24&data=05%7C02%7Cjesseand%40ttu.edu%7Cc125d56ec5964abd5e7908de48a80390%7C178a51bf8b2049ffb65556245d5c173c%7C0%7C0%7C639028084013274039%7CUnknown%7CTWFpbGZsb3d8eyJFbXB0eU1hcGkiOnRydWUsIlYiOiIwLjAuMDAwMCIsIlAiOiJXaW4zMiIsIkFOIjoiTWFpbCIsIldUIjoyfQ%3D%3D%7C0%7C%7C%7C&sdata=8U9YgWMt9MJxN05fParwrqSRfopzBmGb6MITs%2BFh0Ko%3D&reserved=0  (If no link appears, follow the instructions in the next paragraph.)
+
+Click on the link or go to wiley.atyponrex.com/journal/RISA. Sort by journal and submission status to locate this manuscript, then click the “Revise submission” button to submit your revision. You will be able to respond to the reviewer comments when asked to “Upload your Author Response”. All supplementary and additional files will be carried over when you submit a revised manuscript. You may be required to provide additional files at the revision stage.
+
+If you submitted your manuscript through ScholarOne, please use this link to submit your revised manuscript: *** PLEASE NOTE: This is a two-step process. After clicking on the link, you will be directed to a webpage to confirm. ***
+
+https://nam04.safelinks.protection.outlook.com/?url=https%3A%2F%2Furldefense.com%2Fv3%2F__https%3A%2F%2Fmc.manuscriptcentral.com%2Friskanalysis%3FURL_MASK%3D89c65c0599e1469ba1f6bb0f99184d8a__%3B!!PvXuogZ4sRB2p-tU!Bg2Bf459tvAK02QUrIvrwsmOVMdpjku4PofGv53o22u4Y88krgE8HUiKBoug-6hx7-BHN4ttvZ9DKzDQXSLK_YlElaw%24&data=05%7C02%7Cjesseand%40ttu.edu%7Cc125d56ec5964abd5e7908de48a80390%7C178a51bf8b2049ffb65556245d5c173c%7C0%7C0%7C639028084013300383%7CUnknown%7CTWFpbGZsb3d8eyJFbXB0eU1hcGkiOnRydWUsIlYiOiIwLjAuMDAwMCIsIlAiOiJXaW4zMiIsIkFOIjoiTWFpbCIsIldUIjoyfQ%3D%3D%7C0%7C%7C%7C&sdata=r034pV8YKEHEEVoTkSDe9utet2eXOS8x2loi1oHvRdM%3D&reserved=0  Click on the link or go to https://nam04.safelinks.protection.outlook.com/?url=https%3A%2F%2Furldefense.com%2Fv3%2F__https%3A%2F%2Fmc.manuscriptcentral.com%2Friskanalysis__%3B!!PvXuogZ4sRB2p-tU!Bg2Bf459tvAK02QUrIvrwsmOVMdpjku4PofGv53o22u4Y88krgE8HUiKBoug-6hx7-BHN4ttvZ9DKzDQXSLKYuLw8lY%24&data=05%7C02%7Cjesseand%40ttu.edu%7Cc125d56ec5964abd5e7908de48a80390%7C178a51bf8b2049ffb65556245d5c173c%7C0%7C0%7C639028084013320692%7CUnknown%7CTWFpbGZsb3d8eyJFbXB0eU1hcGkiOnRydWUsIlYiOiIwLjAuMDAwMCIsIlAiOiJXaW4zMiIsIkFOIjoiTWFpbCIsIldUIjoyfQ%3D%3D%7C0%7C%7C%7C&sdata=RCMNask45mcwFawXBwWBCKsZbIlUehnMRCFHSir9h%2Fw%3D&reserved=0  and enter your Author Center, where you will find your manuscript title listed under "Manuscripts with Decisions." Under "Actions," click on "Create a Revision”. You will be able to respond to the comments made by the reviewer(s) in the space provided. Your original files are available to you when you upload your revised manuscript. Please delete any redundant files before completing the submission.
+
+Please include a response to the reviewer comments, and also upload both a clean version of your manuscript and a version that indicates changes.
+
+We ask that if you should decide not to submit a revision, please notify the Managing Editor (karenlowrie.editor@gmail.com) that you'd like to withdraw the paper.
+
+Sincerely,
+
+Tony Cox
+Editor-In-Chief
+
+Dr. Roshanak Nateghi, Area Editor
+
+
+Comments from Reviewers
+
+Reviewer: 1
+
+Comments to the Author
+This paper presents a novel probabilistic spatial disaggregation method that assigns anonymized NFIP claims to individual buildings, enhancing structure-level flood risk mapping while preserving policyholder privacy. The authors integrate hierarchical filtering and bootstrap resampling to generate building-specific flood claim likelihood scores with associated uncertainty metrics, enabling more targeted flood impact assessments and risk management.
+While the technical approach seems innovative, the paper’s contribution to the broader scholarship is week and should be articulated better. It lacks a clear articulation of how these likelihood scores advance flood risk science or support predictive modeling. For example, given the fat-tailed nature of disaster losses, past claims are often poor predictors of future events—how does this method address that challenge? The authors should clarify the practical utility of these scores: what can future researchers or practitioners learn from them, and how might they improve flood risk management strategies?
+The case selection from Dodge County, Nebraska  also raises questions. Why was this location chosen, given that other regions experience more frequent or diverse flood events? Areas with repetitive flooding, for examples parts of Texas or Louisiana, could offer richer datasets for validating the model across multiple events. This would strengthen the generalizability and robustness of the scoring method.
+Moreover, the validation relies on claims from a floodplain-heavy region, whereas many recent events (e.g., 2017 Hurricane Harvey saw a good illustration of that) show that significant damage (claims) also happen outside designated floodplains. The fact that we see claims from outside of floodplains show that prior flood incidents have motivated homomers to purchase insurance even if their homes were not required to carry one. What additional parameters beyond floodplain designation and Base Flood Elevation (BFE) could be incorporated to improve predictive accuracy in such contexts?
+More broadly, the paper should clarify the intended audience and use cases for disaggregated historic probabilities. Is the goal to inform insurance pricing, vulnerability assessments, or loss forecasting? NFIP already possesses precise claim location data and how does this method add value beyond existing datasets? For instance, NFIP claims that include geographic coordinates close to actual claim sites can be requested from FEMA through FOIA and will likely provide better means for validation compared to how it is done in the paper.
+Finally, the paper overlooks key limitations such as outdated floodplain maps and the fact that not all homes in floodplains carry flood insurance. Since insurance is only mandated for federally backed mortgages, many vulnerable homes may be uninsured yet still sustain damage. How can we also estimate their likelihood of loss?
+
+
+
+
+Reviewer: 2
+
+Comments to the Author
+Summary
+This study outlines a method to assign anonymized National Flood Insurance Program (NFIP) claims to building footprints. The method is demonstrated using 264 NFIP claims from a single flood event in Dodge County, Nebraska. The research questions focus on assessing optimal configuration (1) and model accuracy (2), but without actual data on claim locations, there is no mechanism to determine whether or not the values have predictive power. (Here, the authors use remotely sensed inundation data as a proxy for flooded properties, but remote sensing of floods in urban areas has known issues.) The third question is not a research question that can be answered within the scope of this study, or with the proposed methodological framework.
+While I thoroughly agree with the motivation for disaggregating the NFIP data onto structures, I strongly believe that the authors are overselling the novelty of the method, since it is little more than a simple matching algorithm based on property level characteristics aggregated through GIS. In addition, the study’s focus on disaggregating these data for a single (small) flood event raise the question of how the results may be biased or would be different in a different location or for a different event, even though the OpenFEMA data are publicly available nationwide (and similar datasets are available elsewhere). Finally, the study does not leverage all of the geospatial data that is made available through OpenFEMA or reference studies that have proposed similar approaches to disaggregate the OpenFEMA data and for which replication code is publicly available (e.g., Wagner 2022 https://nam04.safelinks.protection.outlook.com/?url=https%3A%2F%2Furldefense.com%2Fv3%2F__https%3A%2F%2Fwww.aeaweb.org%2Farticles%3Fid%3D10.1257*pol.20200378__%3BLw!!PvXuogZ4sRB2p-tU!Bg2Bf459tvAK02QUrIvrwsmOVMdpjku4PofGv53o22u4Y88krgE8HUiKBoug-6hx7-BHN4ttvZ9DKzDQXSLK5v7NXlM%24&data=05%7C02%7Cjesseand%40ttu.edu%7Cc125d56ec5964abd5e7908de48a80390%7C178a51bf8b2049ffb65556245d5c173c%7C0%7C0%7C639028084013340700%7CUnknown%7CTWFpbGZsb3d8eyJFbXB0eU1hcGkiOnRydWUsIlYiOiIwLjAuMDAwMCIsIlAiOiJXaW4zMiIsIkFOIjoiTWFpbCIsIldUIjoyfQ%3D%3D%7C0%7C%7C%7C&sdata=kcgSAkh5aMdTPpkcSD6MlJNgU4XquHIQG6DY9JGUOWk%3D&reserved=0 ).
+In terms of the clarity of presentation, I found the methods and the description of the data used difficult to follow. While the data section discusses several datasets used in the study, the source of the data is not always provided. (For example, what year of FEMA flood hazard maps were used to derive flood zones? Do the year of the zip code maps correspond to the year of the flood?) The authors discuss using building attributes like value or construction year, but don’t provide the source of this information and to my knowledge, the attributes are not included in the Microsoft database. Moreover, there is little discussion about why certain datasets were chosen over others. For example, there is no discussion of why the authors chose to use Microsoft Buildings footprint data over other buildings datasets, like the National Structures Inventory or FEMA structures.
+Some line-by-line comments
+Line 246-248 Perhaps provide a table of the relevant characteristics that were used to match claims to buildings at their sources Line 273 There is a reference to flood policies but earlier no discussion of whether OpenFEMA policies were also being placed, or only claims. Moreover, the authors provide no denominators for the information in section 3.3.2 How man possible buildings were eligible to receive a claim placement? Is the policy penetration within the SFHA 100%?
+Line 277 refers to an elevation filter that isn’t introduced until much later in the paper which is confusing.
+Line 282-283 The authors refer to characteristics of the building stock, but provide no information on where these characteristics are derived from or what they are.
+Line 290-291 The OpenFEMA claims contain additional spatial attributes, including latitude and longitude (rounded to 0.1 degrees), census block, zip code, etc. Why weren’t any of these considered to reduce the potential degrees of freedom when assigning claims to structures?
+Line 296-297 Claims can also be on non-residential buildings (I believe there is an agricultural flag in the dataset). Did you pre-filter these out of the dataset? If so, how many claims remained.
+Line 298 Zip codes can be problematic as they change frequently. When considering locations and events beyond the example herein, how might this pose a challenge for the algorithm? How would this be different if using census block groups as the spatial unit to disaggregate from?
+Line 299-300 What is meant by flood zone restrictions? Which building characteristics were considered, what are elevation tolerances and how were property values derived? Not enough information is provided about these choices and why they were made.
+Line 301 “filter” Is the idea here the NFIP claims are preferentially assigned to lower elevation building matches before higher elevation building matches?
+Line 308 “the parameter sweep described later in the Results section” Shouldn’t this be described in the methods section?
+Line 633 Why was this event chosen? How do the performance metrics look during a larger or a smaller event in the same area? Could one assume that there is a higher probability of a repeat claim if a similar event hits the same area? Also, how does this number relate to the total number of buildings where claims could be assigned?
+Line 730 “The aggregation of those data has limited granular flood risk analysis” The meaning of this sentence is not clear and is important to the content of the paper. It should be elaborated.

@@ -1,0 +1,42 @@
+# Risk Analysis Journal Profile
+# Use with: quarto render --profile risa
+
+project:
+  type: default
+  render:
+    - index.qmd
+
+format:
+  html:
+    toc: false
+  docx:
+    toc: false
+    number-sections: true
+  pdf:
+    documentclass: article
+    papersize: letter
+    fontsize: 12pt
+    linestretch: 2
+    geometry:
+      - margin=1in
+    number-sections: true
+    toc: false
+    top-level-division: section
+
+# Risk Analysis journal requirements:
+# - Word limit: ~8,000 words (excluding references, tables, figures)
+# - Abstract: 250 words max
+# - Keywords: 4-6 required
+# - Citation style: Author-year (Harvard)
+# - Figures: 300 dpi minimum for print
+# - Tables: No vertical lines
+
+bibliography: references.bib
+csl: csl/apa.csl
+
+# Validation thresholds
+_validation:
+  max_words: 8000
+  max_abstract_words: 250
+  min_keywords: 4
+  max_keywords: 6
