@@ -1,148 +1,115 @@
-# NFIP Claims Disaggregation Project
+# NFIP Claims Disaggregation (CENTAUR)
 
-**Paper Title**: An Approach to Probabilistic Disaggregation of National Flood Insurance Program (NFIP) Claims onto Building Footprints
+**An Approach to Probabilistic Disaggregation of National Flood Insurance Program (NFIP) Claims onto Building Footprints**
 
-**Manuscript ID**: RA-00555-2025
-**Target Journal**: Risk Analysis
-**Status**: Major Revision (R&R1)
+**Manuscript ID**: RA-00555-2025 | **Journal**: Risk Analysis | **Status**: Major Revision (R&R1)
 
-## Project Overview
+**Authors**: Jesse Andrews, Zhenghong Tang, Yunwoo Nam, Jiyoung Lee (University of Nebraska-Lincoln)
 
-This project develops and validates a probabilistic spatial disaggregation method to assign anonymized NFIP claims to individual building footprints, enabling structure-level flood risk mapping while preserving policyholder privacy.
+---
 
-### Key Methodological Components
+## What This Project Does
 
-- **Hierarchical filtering** based on ZIP code, flood zone, and building attributes
-- **Bootstrap resampling** to quantify uncertainty in claim assignment
-- **Building-specific likelihood scores** for flood claim association
-- **Topographic covariates** (slope and distance-to-SFHA) for outside-floodplain checks
-- **External validation** using FEMA housing assistance totals at ZIP level
-- **Loss-size stratification** to assess upper-tail sensitivity
+This project develops and validates a probabilistic spatial method to assign anonymized NFIP flood insurance claims to individual building footprints. The approach enables structure-level flood risk mapping while preserving policyholder privacy — useful for local planners, floodplain managers, and researchers who need building-scale flood exposure data that the public NFIP dataset does not provide directly.
 
-### Study Area
+**Study area**: Dodge and Douglas Counties, Nebraska (March 2019 flood); Cass and Dakota Counties (2011 late spring storms)
 
-- Dodge County, Nebraska
-- Douglas County, Nebraska
-- March 2019 flood event (Dodge + Douglas)
-- 2011 late spring storms event (Cass + Dakota)
+**Key methods**: Hierarchical filtering by ZIP, flood zone, and building attributes; bootstrap resampling for uncertainty; topographic covariates (slope, distance to SFHA); external validation against FEMA housing assistance totals.
 
-## Analysis Recreation Status
+**Core results**: ROC-AUC 0.969, PR-AUC 0.874 on held-out test set; 99.6% claim match rate.
 
-All analyses from the original paper have been successfully recreated using open-source Python tools:
+---
 
-| Phase | Status | Key Results |
-|-------|--------|-------------|
-| Data Preparation | ✅ Complete | 261 claims, 34,350 buildings |
-| Core Bootstrap | ✅ Complete | ROC-AUC 0.969, PR-AUC 0.874 |
-| Parameter Sweep | ✅ Complete | Table 1 (4 configurations) |
-| Sensitivity Analysis | ✅ Complete | Iteration, elevation, buffer tests |
-| Per-Claim Diagnostics | ✅ Complete | 99.6% match rate |
-| Publication Figures | ✅ Complete | ROC, PR, calibration plots |
-| Robustness Checks | ✅ Complete | Seed stability, jackknife, spatial CV |
-| External Validation | ✅ Complete | ZIP-level FEMA IA correlation |
-| Loss-Size Stratification | ✅ Complete | Low/mid/high payment strata |
+## Manuscript
 
-**Full results**: See [doc/ANALYSIS_RESULTS.md](doc/ANALYSIS_RESULTS.md)
+The latest compiled manuscript is at the repository root:
+
+- [`manuscript.docx`](manuscript.docx) — Word format (for journal submission and editing)
+- [`manuscript.pdf`](manuscript.pdf) — PDF format (for reading)
+
+Source: `manuscript_quarto/index.qmd` (Quarto, requires Quarto + LaTeX to re-render)
+
+The revision response letter is in `manuscript_quarto/RESPONSE_LETTER_COMBINED.*`.
+
+---
 
 ## Repository Structure
 
 ```
-├── manuscript_quarto/      # Manuscript in Quarto format
-│   ├── index.qmd          # Main manuscript
-│   ├── appendix-*.qmd     # Appendices
-│   ├── _quarto-risa.yml   # Risk Analysis journal profile
-│   └── REVISION_TRACKER.md # Review response tracking
-├── scripts/               # Analysis scripts
-│   └── NEFloodMitigation/ # Cloned GitHub repository with geospatial scripts
-├── doc/                   # Documentation
-│   └── reviews/           # Review cycle files
-├── src/                   # CENTAUR pipeline stages
-└── data_work/             # Processed data (gitignored)
+├── manuscript.docx / manuscript.pdf   # Latest compiled manuscript (root)
+├── manuscript_quarto/                 # Quarto source + revision materials
+│   ├── index.qmd                      # Main manuscript source
+│   ├── references.bib                 # Bibliography
+│   ├── REVISION_TRACKER.md            # Point-by-point reviewer response tracker
+│   ├── RESPONSE_LETTER_COMBINED.*     # Combined response letter (docx/md/pdf)
+│   └── figures/                       # Publication figures (PDF + PNG)
+├── src/stages/                        # Analysis pipeline stages (s00–s04)
+├── scripts/                           # Utility and revision scripts
+│   └── NEFloodMitigation/             # Related sub-project (separate git repo)
+├── data_raw/                          # Raw input data (gitignored; see DATA_ACQUISITION.md)
+├── data_work/                         # Intermediate outputs (gitignored)
+├── doc/                               # Extended documentation
+└── demo/                              # Demo data and example run
 ```
 
-## Current Status
-
-**Revision in Progress** - Addressing major revision from Risk Analysis journal.
-
-### Key Reviewer Concerns to Address
-
-1. Method novelty positioning (Reviewer 2 - Critical)
-2. Comparison to Wagner (2022) approach (Critical)
-3. Case selection justification (Dodge County vs Texas/Louisiana)
-4. Data source documentation (OpenFEMA fields)
-5. Generalizability beyond single event
-6. Intended audience and use cases
-
-## Quick Start
+## Running the Analysis
 
 ```bash
-# Activate environment
+# 1. Activate environment
 source .venv/bin/activate
 
-# Run full analysis recreation
-python src/stages/s00_prepare_nfip.py     # Prepare data
-python src/stages/s01_bootstrap_disagg.py  # Core bootstrap
-python src/stages/s02_parameter_sweep.py   # Table 1 recreation
-python src/stages/s02b_sensitivity_analysis.py  # Sensitivity tests
-python src/stages/s02c_claim_diagnostics.py     # Per-claim diagnostics
-python src/stages/s03_figures.py           # Generate figures
-python src/stages/s04_robustness.py        # Robustness checks
-python src/stages/s02d_ia_validation.py    # FEMA housing assistance validation
-python src/stages/s02e_acs_uptake.py       # ACS policy uptake context
+# 2. Run pipeline stages in order
+python src/stages/s00_prepare_nfip.py          # Prepare NFIP claims + buildings
+python src/stages/s01_bootstrap_disagg.py      # Core bootstrap disaggregation
+python src/stages/s02_parameter_sweep.py       # Table 1 (4 configurations)
+python src/stages/s02b_sensitivity_analysis.py # Sensitivity tests
+python src/stages/s02c_claim_diagnostics.py    # Per-claim diagnostics
+python src/stages/s02d_ia_validation.py        # External FEMA IA validation
+python src/stages/s02e_acs_uptake.py           # ACS policy uptake context
+python src/stages/s03_figures.py               # Publication figures
+python src/stages/s04_robustness.py            # Robustness checks
 
-# Review management
-python src/pipeline.py review_status       # Check review status
-python src/pipeline.py review_verify       # Verify revision completeness
-python src/pipeline.py review_response     # Generate response letter
-
-# Render manuscript
+# 3. Re-render manuscript (requires Quarto + LaTeX)
 cd manuscript_quarto && ./render_all.sh --profile risa
 ```
 
-## Pipeline Stages
-
-The analysis pipeline in `src/stages/`:
-
-| Stage | Script | Purpose |
-|-------|--------|---------|
-| s00 | `s00_prepare_nfip.py` | Data preparation (claims, buildings, elevation, flood zones) |
-| s00b | `s00b_download_nfhl.py` | Download NFHL flood zones from FEMA API |
-| s01 | `s01_bootstrap_disagg.py` | Core bootstrap disaggregation algorithm |
-| s02 | `s02_parameter_sweep.py` | Table 1 parameter sweep (4 configurations) |
-| s02b | `s02b_sensitivity_analysis.py` | Sensitivity analysis (iterations, elevation, buffer) |
-| s02c | `s02c_claim_diagnostics.py` | Per-claim filter chain diagnostics |
-| s02d | `s02d_ia_validation.py` | FEMA housing assistance ZIP validation |
-| s02e | `s02e_acs_uptake.py` | ACS-based policy uptake context |
-| s03 | `s03_figures.py` | Publication figures (ROC, PR, calibration) |
-| s04 | `s04_robustness.py` | Robustness checks (seed stability, jackknife, spatial CV) |
-
-## Data and Code
-
-- Repository: https://github.com/jrandre2/NFIP-Disaggregation-CENTAUR
-- OpenFEMA: NFIP Claims, NFIP Policies, Housing Assistance Owners
-  - https://www.fema.gov/openfema-data-page/fima-nfip-claims
-  - https://www.fema.gov/openfema-data-page/fima-nfip-policies
-  - https://www.fema.gov/openfema-data-page/housing-assistance-owners
-- FEMA NFHL: https://www.fema.gov/flood-maps/national-flood-hazard-layer
-- USGS 3DEP: https://www.usgs.gov/3d-elevation-program
-- U.S. Census TIGER/ACS: https://api.census.gov/data/2019/acs/acs5.html
-
-### Original GitHub Scripts
-
-The original ArcPy-based scripts are in `scripts/NEFloodMitigation/Data/Geospatial-Scripts/`:
-
-| Script | Purpose |
-|--------|---------|
-| `Bootstrap_Parameter_Testing_Pipeline.py` | Original bootstrap pipeline (ArcPy) |
-| `NFIPPolicyDescriptivesBootstrap.py` | NFIP policy diagnostics |
-| `CenPy_ACS_to_Shapefile.py` | Census data preparation |
-| `DEM_to_Points.py` | Elevation extraction |
-
-## Team
-
-- **PI**: Dr. Zhenghong Tang (University of Nebraska-Lincoln)
-- **Co-Investigators**: Dr. Yunwoo Nam, Dr. Jesse Andrews, Dr. Jiyoung Lee
+See [`doc/GETTING_STARTED.md`](doc/GETTING_STARTED.md) for data acquisition and full setup.
 
 ---
 
-*Built on the CENTAUR research workflow platform*
+## Data Sources
+
+All input data are publicly available and gitignored locally. See [`doc/DATA_ACQUISITION.md`](doc/DATA_ACQUISITION.md) for download instructions.
+
+| Dataset | Source |
+|---------|--------|
+| NFIP Claims (OpenFEMA) | https://www.fema.gov/openfema-data-page/fima-nfip-claims |
+| NFIP Policies (OpenFEMA) | https://www.fema.gov/openfema-data-page/fima-nfip-policies |
+| Housing Assistance Owners | https://www.fema.gov/openfema-data-page/housing-assistance-owners |
+| FEMA NFHL Flood Zones | https://www.fema.gov/flood-maps/national-flood-hazard-layer |
+| USGS 3DEP Elevation | https://www.usgs.gov/3d-elevation-program |
+| U.S. Census TIGER/ACS | https://api.census.gov/data/2019/acs/acs5.html |
+
+---
+
+## Related Sub-Project
+
+`scripts/NEFloodMitigation/` is a **separate git repository** ([NEFloodMitigation-Risk-Assessment-and-Community-Adaptation](https://github.com/jrandre2/NEFloodMitigation-Risk-Assessment-and-Community-Adaptation)) containing the original ArcPy-based geospatial scripts this project's Python pipeline was built from. It is registered as a git submodule. The CENTAUR pipeline in `src/stages/` is the recommended open-source replacement that does not require ArcGIS.
+
+---
+
+## Documentation Index
+
+| Doc | Purpose |
+|-----|---------|
+| [`doc/METHODOLOGY.md`](doc/METHODOLOGY.md) | Full methodological details |
+| [`doc/ANALYSIS_RESULTS.md`](doc/ANALYSIS_RESULTS.md) | Numerical results summary |
+| [`doc/DATA_DICTIONARY.md`](doc/DATA_DICTIONARY.md) | Variable definitions |
+| [`doc/PIPELINE.md`](doc/PIPELINE.md) | Pipeline architecture |
+| [`doc/REPRODUCTION.md`](doc/REPRODUCTION.md) | Exact reproduction steps |
+| [`doc/CHANGELOG.md`](doc/CHANGELOG.md) | Change history |
+| [`manuscript_quarto/REVISION_TRACKER.md`](manuscript_quarto/REVISION_TRACKER.md) | Reviewer response tracker |
+
+---
+
+*Built on the CENTAUR research workflow platform.*

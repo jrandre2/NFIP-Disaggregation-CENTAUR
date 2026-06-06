@@ -63,6 +63,13 @@ COUNTIES = {
         "nfhl": DATA_RAW / "nfhl" / "S_FLD_HAZ_AR.shp",
         "boundary": None,
     },
+    "knox": {
+        "fips": 31107,
+        "county_id": "107",
+        "bounds": None,
+        "nfhl": DATA_RAW / "nfhl" / "S_FLD_HAZ_AR.shp",
+        "boundary": None,
+    },
 }
 
 
@@ -150,6 +157,9 @@ def prepare_claims(
         claims["amountPaidOnIncreasedCostOfComplianceClaim"].fillna(0.0)
     )
     claims["TotalPayment"] = net_total.where(net_total > 0, gross_total)
+
+    # Exclude zero-payment claims to avoid assigning likelihoods to non-loss records.
+    claims = claims[claims["TotalPayment"] > 0].copy()
 
     claims["ClaimID"] = range(1, len(claims) + 1)
 

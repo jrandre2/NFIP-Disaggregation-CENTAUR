@@ -37,6 +37,7 @@ manuscript_quarto/_output/
 *.swp
 *.swo
 *~
+~$*
 .spyderproject
 .spyproject
 

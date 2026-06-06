@@ -34,6 +34,7 @@ COUNTIES = {
     "douglas": {"fips": "055"},
     "cass": {"fips": "025"},
     "dakota": {"fips": "043"},
+    "knox": {"fips": "107"},
 }
 
 NFHL_PATHS = {
@@ -41,6 +42,7 @@ NFHL_PATHS = {
     "douglas": Path("/Users/jesseandrews/Downloads/31055C_20250325/S_FLD_HAZ_AR.shp"),
     "cass": DATA_RAW / "nfhl" / "S_FLD_HAZ_AR.shp",
     "dakota": DATA_RAW / "nfhl" / "S_FLD_HAZ_AR.shp",
+    "knox": DATA_RAW / "nfhl" / "S_FLD_HAZ_AR.shp",
 }
 
 
@@ -391,7 +393,11 @@ def run_payment_strata(claims: pd.DataFrame,
         pd.DataFrame(rows).to_csv(base_dir / "metrics_payment_strata.csv", index=False)
 
 
-def run_for_county(county_key: str, base_dir_root: Path, skip_policies: bool, skip_inundation: bool) -> None:
+def run_for_county(county_key: str,
+                   base_dir_root: Path,
+                   skip_policies: bool,
+                   skip_inundation: bool,
+                   force_zip_only: bool) -> None:
     base_dir = base_dir_root / county_key
     claims_path = base_dir / "claims_prepared.csv"
     buildings_path = base_dir / "buildings_prepared.gpkg"
@@ -423,9 +429,17 @@ def run_for_county(county_key: str, base_dir_root: Path, skip_policies: bool, sk
     if "SlopeDeg" not in buildings_df.columns:
         buildings_df["SlopeDeg"] = np.nan
 
+    zip_field = "ZIP"
+    zip_series = buildings_df["ZIP"].astype(str).str.strip()
+    zip_series = zip_series.replace({"": np.nan, "nan": np.nan, "None": np.nan})
+    if not zip_series.notna().any() and "ZCTA" in buildings_df.columns:
+        zip_field = "ZCTA"
+
     inundated_ids = get_inundated_ids(buildings, inund) if inund is not None else None
 
     fz_available = buildings_df["FloodZone"].notna().any()
+    if force_zip_only:
+        fz_available = False
 
     # Compute distance to SFHA only for ZIPs with Zone X claims if missing
     if fz_available and buildings_df["DistToSFHA_m"].isna().any():
@@ -502,15 +516,15 @@ def run_for_county(county_key: str, base_dir_root: Path, skip_policies: bool, sk
     # Policy vs claim distribution comparison (baseline ZIP+FZ)
     if policies is not None:
         base_config = {
-            "key_field": "ZIP",
-            "use_flood_zone": True,
+            "key_field": zip_field,
+            "use_flood_zone": fz_available,
             "elev_tolerance": 0.5,
             "val_tolerance": None,
             "year_tolerance": None,
             "n_iterations": 1000,
             "seed": 42,
         }
-        idx = build_indices(buildings_df, "ZIP", True)
+        idx = build_indices(buildings_df, zip_field, fz_available)
         claim_results, _ = run_bootstrap(claims, buildings_df, idx, base_config, boundary=boundary)
         pol_config = {**base_config, "use_policy_count": True}
         policy_results, _ = run_bootstrap(policies, buildings_df, idx, pol_config, boundary=boundary)
@@ -538,9 +552,9 @@ def run_for_county(county_key: str, base_dir_root: Path, skip_policies: bool, sk
         claim_results.to_csv(base_dir / "claim_probabilities.csv", index=False)
         policy_results.to_csv(base_dir / "policy_probabilities.csv", index=False)
     else:
-        idx = build_indices(buildings_df, "ZIP", fz_available)
+        idx = build_indices(buildings_df, zip_field, fz_available)
         claim_results, _ = run_bootstrap(claims, buildings_df, idx, {
-            "key_field": "ZIP",
+            "key_field": zip_field,
             "use_flood_zone": fz_available,
             "elev_tolerance": 0.5,
             "val_tolerance": None,
@@ -563,11 +577,17 @@ def main() -> None:
                         help="Skip policy comparison outputs.")
     parser.add_argument("--skip-inundation", action="store_true",
                         help="Skip inundation-based metrics.")
+    parser.add_argument("--force-zip-only", action="store_true",
+                        help="Force ZIP-only matching even when flood zones are available.")
     args = parser.parse_args()
 
     base_dir_root = Path(args.base_dir)
     for key in [c.strip() for c in args.counties.split(",") if c.strip()]:
-        run_for_county(key, base_dir_root, args.skip_policies, args.skip_inundation)
+        run_for_county(key,
+                       base_dir_root,
+                       args.skip_policies,
+                       args.skip_inundation,
+                       args.force_zip_only)
 
 
 if __name__ == "__main__":

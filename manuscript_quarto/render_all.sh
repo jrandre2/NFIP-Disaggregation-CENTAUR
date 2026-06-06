@@ -95,6 +95,9 @@ rm -rf "$OUTPUT_DIR"/*
 mkdir -p "$OUTPUT_DIR"
 cp -r "$TEMP_DIR"/* "$OUTPUT_DIR"/
 
+rm -f "$OUTPUT_DIR"/index.html "$OUTPUT_DIR"/index.pdf "$OUTPUT_DIR"/index.docx "$OUTPUT_DIR"/index.tex
+rm -rf "$OUTPUT_DIR"/index_files
+
 echo ""
 echo "=== Done! All formats in $OUTPUT_DIR ==="
 ls -la "$OUTPUT_DIR"/*.html "$OUTPUT_DIR"/*.pdf "$OUTPUT_DIR"/*.docx 2>/dev/null || ls -la "$OUTPUT_DIR"

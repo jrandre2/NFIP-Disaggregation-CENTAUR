@@ -19,6 +19,7 @@ format:
     number-sections: true
     code-fold: true
     theme: cosmo
+    output-file: "An Approach to Probabilistic Disaggregation of National Flood Insurance Program (NFIP) Claims onto Building Footprints.html"
 
   pdf:
     documentclass: article
@@ -36,6 +37,7 @@ format:
         \usepackage{float}
         \usepackage{needspace}
         \renewenvironment{abstract}{\par\bigskip\noindent\textbf{Abstract}\par\smallskip}{\par\bigskip}
+    output-file: "An Approach to Probabilistic Disaggregation of National Flood Insurance Program (NFIP) Claims onto Building Footprints.pdf"
 
   docx:
     toc: false
@@ -43,6 +45,7 @@ format:
     number-sections: true
     reference-doc: reference.docx
     highlight-style: github
+    output-file: "An Approach to Probabilistic Disaggregation of National Flood Insurance Program (NFIP) Claims onto Building Footprints.docx"
 
 bibliography: references.bib
 csl: csl/apa.csl  # Default citation style; override per-journal in profile files

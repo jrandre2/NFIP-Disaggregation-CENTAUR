@@ -387,7 +387,7 @@ def plot_calibration(results_by_county: Dict, gt_by_county: Dict) -> None:
         ax.set_ylim([0, 1])
         ax.legend(loc="lower right", fontsize=8)
 
-    fig.suptitle("Calibration Plots (ZCTA + FZ baseline)", fontsize=14)
+    fig.suptitle("Calibration Plots, ZCTA + FZ baseline", fontsize=14)
     plt.tight_layout()
     fig.savefig(FIGURES_DIR / "fig_calibration.png", dpi=300, bbox_inches="tight")
     fig.savefig(FIGURES_DIR / "fig_calibration.pdf", bbox_inches="tight")
@@ -634,7 +634,7 @@ def plot_probability_maps(results_by_county: Dict,
                 zorder=2,
             )
         _plot_county_outline(ax, outline)
-        ax.set_title(f"{county_info['label']} (hex aggregation)", fontsize=12)
+        ax.set_title(f"{county_info['label']} hex aggregation", fontsize=12)
         ax.set_axis_off()
         ax.set_aspect("equal")
         _plot_colorbar(
@@ -646,7 +646,7 @@ def plot_probability_maps(results_by_county: Dict,
             tick_labels=hex_tick_labels,
         )
         fig.suptitle(
-            "County-Level Hex Bins of Claim Frequency (ZCTA + FZ baseline)", fontsize=13
+            "County-Level Hex Bins of Claim Frequency, ZCTA + FZ baseline", fontsize=13
         )
         fig.tight_layout()
         fig.savefig(
@@ -693,7 +693,7 @@ def plot_probability_maps(results_by_county: Dict,
                 zorder=2,
             )
         _plot_county_outline(ax, outline_zoom)
-        ax.set_title(f"{county_info['label']} (zoomed)", fontsize=12)
+        ax.set_title(f"{county_info['label']} zoomed view", fontsize=12)
         ax.set_axis_off()
         ax.set_aspect("equal")
         _plot_colorbar(fig, ax, norm, "Bootstrap draw count", ticks)
