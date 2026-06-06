@@ -52,28 +52,11 @@ The revision response letter is in `manuscript_quarto/RESPONSE_LETTER_COMBINED.*
 └── demo/                              # Demo data and example run
 ```
 
-## Running the Analysis
+## Reproducing the Analysis
 
-```bash
-# 1. Activate environment
-source .venv/bin/activate
+The pipeline runs nine ordered Python stages (data preparation through robustness checks), followed by an optional Quarto + LaTeX manuscript re-render. All input data are publicly available via OpenFEMA, USGS, and the U.S. Census — none are committed to this repository.
 
-# 2. Run pipeline stages in order
-python src/stages/s00_prepare_nfip.py          # Prepare NFIP claims + buildings
-python src/stages/s01_bootstrap_disagg.py      # Core bootstrap disaggregation
-python src/stages/s02_parameter_sweep.py       # Table 1 (4 configurations)
-python src/stages/s02b_sensitivity_analysis.py # Sensitivity tests
-python src/stages/s02c_claim_diagnostics.py    # Per-claim diagnostics
-python src/stages/s02d_ia_validation.py        # External FEMA IA validation
-python src/stages/s02e_acs_uptake.py           # ACS policy uptake context
-python src/stages/s03_figures.py               # Publication figures
-python src/stages/s04_robustness.py            # Robustness checks
-
-# 3. Re-render manuscript (requires Quarto + LaTeX)
-cd manuscript_quarto && ./render_all.sh --profile risa
-```
-
-See [`doc/GETTING_STARTED.md`](doc/GETTING_STARTED.md) for data acquisition and full setup.
+Full step-by-step instructions, stage descriptions, and expected outputs are in [`doc/REPRODUCTION.md`](doc/REPRODUCTION.md). Data download instructions are in [`doc/DATA_ACQUISITION.md`](doc/DATA_ACQUISITION.md).
 
 ---
 
