@@ -85,3 +85,11 @@ dist/
 # Project-specific (internal)
 doc/RISBS_*
 manuscript_quarto/drafts/
+
+# Confidential peer-review materials — never commit to the public repo
+/doc/reviews/
+/manuscript_quarto/REVISION_TRACKER.md
+/manuscript_quarto/RESPONSE_TO_REVIEWERS.md
+/manuscript_quarto/RESPONSE_LETTER_COMBINED.*
+/manuscript_quarto/COAUTHOR_NOTE.md
+/manuscript_quarto/revisions/
