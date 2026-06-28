@@ -1,0 +1,49 @@
+# Journal of Flood Risk Management profile
+# Use with: quarto render --profile jfrm
+#
+# JFRM submission notes:
+# - Original research articles should be below 6,000 words excluding
+#   references, illustrations, and tables.
+# - Title should avoid abbreviations.
+# - Running title should be 40 characters or fewer.
+# - Up to eight keywords are allowed.
+
+csl: csl/apa.csl
+
+format:
+  pdf:
+    documentclass: article
+    papersize: letter
+    geometry:
+      - margin=1in
+    fontsize: 12pt
+    linestretch: 2.0
+    number-sections: true
+    toc: false
+    keep-tex: true
+    top-level-division: section
+    output-file: "JFRM_NFIP_Disaggregation.pdf"
+    include-in-header:
+      text: |
+        \usepackage{booktabs}
+        \usepackage{longtable}
+        \usepackage{float}
+        \usepackage{setspace}
+        \doublespacing
+
+  docx:
+    toc: false
+    number-sections: true
+    reference-doc: reference.docx
+    output-file: "JFRM_NFIP_Disaggregation.docx"
+
+  html:
+    toc: false
+    toc-depth: 3
+    number-sections: true
+    output-file: "JFRM_NFIP_Disaggregation.html"
+
+_validation:
+  max_words: 6000
+  max_running_title_chars: 40
+  max_keywords: 8

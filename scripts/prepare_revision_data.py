@@ -46,8 +46,8 @@ COUNTIES = {
         "fips": 31055,
         "county_id": "055",
         "bounds": None,
-        "nfhl": Path("/Users/jesseandrews/Downloads/31055C_20250325/S_FLD_HAZ_AR.shp"),
-        "boundary": Path("/Volumes/T9/Projects/Freeze and Flight/data_work/douglas_county.gpkg"),
+        "nfhl": DATA_RAW / "nfhl" / "douglas_county_flood_zones.gpkg",
+        "boundary": None,  # derived from data_raw/cbg by COUNTYFP (portable)
     },
     "cass": {
         "fips": 31025,

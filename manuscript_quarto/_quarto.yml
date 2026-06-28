@@ -10,7 +10,7 @@ project:
 profile:
   default: risa
   group:
-    - [default, risa, jeem, aer, nhaz]
+    - [default, risa, jfrm, jeem, aer, nhaz]
 
 format:
   html:

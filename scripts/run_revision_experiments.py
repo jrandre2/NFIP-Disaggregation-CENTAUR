@@ -39,7 +39,7 @@ COUNTIES = {
 
 NFHL_PATHS = {
     "dodge": DATA_RAW / "nfhl" / "S_FLD_HAZ_AR.shp",
-    "douglas": Path("/Users/jesseandrews/Downloads/31055C_20250325/S_FLD_HAZ_AR.shp"),
+    "douglas": DATA_RAW / "nfhl" / "douglas_county_flood_zones.gpkg",
     "cass": DATA_RAW / "nfhl" / "S_FLD_HAZ_AR.shp",
     "dakota": DATA_RAW / "nfhl" / "S_FLD_HAZ_AR.shp",
     "knox": DATA_RAW / "nfhl" / "S_FLD_HAZ_AR.shp",
